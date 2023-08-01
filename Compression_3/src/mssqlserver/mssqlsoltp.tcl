@@ -2398,7 +2398,7 @@ switch $myposition {
             }
             if { [ tsv::get application abort ] } { break }
             puts "Rampup complete, Taking start Transaction Count."
-            if {[catch {set rows [ odbc allrows "select sum(d_next_o_id) from district" ]} message ]} {
+            if {[catch {set rows [ odbc allrows "select sum(cast(d_next_o_id as bigint)) from district" ]} message ]} {
                 error "Failed to query district table : $message"
             } else {
                 set start_nopm [ lindex {*}$rows 1 ]
@@ -2423,7 +2423,7 @@ switch $myposition {
             }
             if { [ tsv::get application abort ] } { break }
             puts "Test complete, Taking end Transaction Count."
-            if {[catch {set rows [ odbc allrows "select sum(d_next_o_id) from district" ]} message ]} {
+            if {[catch {set rows [ odbc allrows "select sum(cast(d_next_o_id as bigint)) from district" ]} message ]} {
                 error "Failed to query district table : $message"
             } else {
                 set end_nopm [ lindex {*}$rows 1 ]
@@ -2817,7 +2817,7 @@ switch $myposition {
             }
             if { [ tsv::get application abort ] } { break }
             puts "Rampup complete, Taking start Transaction Count."
-            if {[catch {set rows [ odbc allrows "select sum(d_next_o_id) from district" ]} message ]} {
+            if {[catch {set rows [ odbc allrows "select sum(cast(d_next_o_id as bigint)) from district" ]} message ]} {
                 error "Failed to query district table : $message"
             } else {
                 set start_nopm [ lindex {*}$rows 1 ]
@@ -2842,7 +2842,7 @@ switch $myposition {
             }
             if { [ tsv::get application abort ] } { break }
             puts "Test complete, Taking end Transaction Count."
-            if {[catch {set rows [ odbc allrows "select sum(d_next_o_id) from district" ]} message ]} {
+            if {[catch {set rows [ odbc allrows "select sum(cast(d_next_o_id as bigint)) from district" ]} message ]} {
                 error "Failed to query district table : $message"
             } else {
                 set end_nopm [ lindex {*}$rows 1 ]
