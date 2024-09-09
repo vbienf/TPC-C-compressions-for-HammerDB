@@ -91,7 +91,7 @@ proc CreateStoredProcs { lda ora_compatible citus_compatible pg_storedprocs } {
             FROM customer, warehouse
             WHERE warehouse.w_id = no_w_id AND customer.c_w_id = no_w_id AND
             customer.c_d_id = no_d_id AND customer.c_id = no_c_id;
-            UPDATE district SET d_next_o_id = d_next_o_id + 1 WHERE d_id = no_d_id AND d_w_id = no_w_id RETURNING d_next_o_id, d_tax INTO no_d_next_o_id, no_d_tax;
+            UPDATE district SET d_next_o_id = d_next_o_id + 1 WHERE d_id = no_d_id AND d_w_id = no_w_id RETURNING d_next_o_id - 1, d_tax INTO no_d_next_o_id, no_d_tax;
             o_id := no_d_next_o_id;
             INSERT INTO ORDERS (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) VALUES (o_id, no_d_id, no_w_id, no_c_id, tstamp, no_o_ol_cnt, no_o_all_local);
             INSERT INTO NEW_ORDER (no_o_id, no_d_id, no_w_id) VALUES (o_id, no_d_id, no_w_id);
@@ -535,7 +535,7 @@ proc CreateStoredProcs { lda ora_compatible citus_compatible pg_storedprocs } {
                 order_line_array[loop_counter] := loop_counter;
                 END LOOP;
 
-                UPDATE district SET d_next_o_id = d_next_o_id + 1 WHERE d_id = no_d_id AND d_w_id = no_w_id RETURNING d_next_o_id, d_tax INTO no_d_next_o_id, no_d_tax;
+                UPDATE district SET d_next_o_id = d_next_o_id + 1 WHERE d_id = no_d_id AND d_w_id = no_w_id RETURNING d_next_o_id - 1, d_tax INTO no_d_next_o_id, no_d_tax;
 
                 INSERT INTO ORDERS (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) VALUES (no_d_next_o_id, no_d_id, no_w_id, no_c_id, current_timestamp, no_o_ol_cnt, no_o_all_local);
                 INSERT INTO NEW_ORDER (no_o_id, no_d_id, no_w_id) VALUES (no_d_next_o_id, no_d_id, no_w_id);
@@ -1072,7 +1072,7 @@ proc CreateStoredProcs { lda ora_compatible citus_compatible pg_storedprocs } {
                 order_line_array[loop_counter] := loop_counter;
                 END LOOP;
 
-                UPDATE district SET d_next_o_id = d_next_o_id + 1 WHERE d_id = no_d_id AND d_w_id = no_w_id RETURNING d_next_o_id, d_tax INTO no_d_next_o_id, no_d_tax;
+                UPDATE district SET d_next_o_id = d_next_o_id + 1 WHERE d_id = no_d_id AND d_w_id = no_w_id RETURNING d_next_o_id - 1, d_tax INTO no_d_next_o_id, no_d_tax;
 
                 INSERT INTO ORDERS (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) VALUES (no_d_next_o_id, no_d_id, no_w_id, no_c_id, current_timestamp, no_o_ol_cnt, no_o_all_local);
                 INSERT INTO NEW_ORDER (no_o_id, no_d_id, no_w_id) VALUES (no_d_next_o_id, no_d_id, no_w_id);
@@ -1650,7 +1650,7 @@ proc CreateTables { lda ora_compatible citus_compatible num_part } {
         set sql(2) "CREATE TABLE DISTRICT (D_ID NUMBER(2, 0), D_W_ID NUMBER(6, 0), D_YTD NUMBER(12, 2), D_TAX NUMBER(4, 4), D_NEXT_O_ID NUMBER, D_NAME VARCHAR2(10), D_STREET_1 VARCHAR2(20), D_STREET_2 VARCHAR2(20), D_CITY VARCHAR2(20), D_STATE CHAR(2), D_ZIP CHAR(9))"
         set sql(3) "CREATE TABLE HISTORY (H_C_ID NUMBER, H_C_D_ID NUMBER, H_C_W_ID NUMBER, H_D_ID NUMBER, H_W_ID NUMBER, H_DATE DATE, H_AMOUNT NUMBER(6, 2), H_DATA VARCHAR2(24))"
         set sql(4) "CREATE TABLE ITEM (I_ID NUMBER(6, 0), I_IM_ID NUMBER, I_NAME VARCHAR2(24), I_PRICE NUMBER(5, 2), I_DATA VARCHAR2(50))"
-        set sql(5) "CREATE TABLE WAREHOUSE (W_ID NUMBER(6, 0), W_YTD NUMBER(12, 2), W_TAX NUMBER(4, 4), W_NAME VARCHAR2(10), W_STREET_1 VARCHAR2(20), W_STREET_2 VARCHAR2(20), W_CITY VARCHAR2(20), W_STATE CHAR(2), W_ZIP CHAR(9))"
+        set sql(5) "CREATE TABLE WAREHOUSE (W_ID NUMBER(6, 0), W_YTD NUMBER(16, 2), W_TAX NUMBER(4, 4), W_NAME VARCHAR2(10), W_STREET_1 VARCHAR2(20), W_STREET_2 VARCHAR2(20), W_CITY VARCHAR2(20), W_STATE CHAR(2), W_ZIP CHAR(9))"
         set sql(6) "CREATE TABLE STOCK (S_I_ID NUMBER(6, 0), S_W_ID NUMBER(6, 0), S_QUANTITY NUMBER(6, 0), S_DIST_01 CHAR(24), S_DIST_02 CHAR(24), S_DIST_03 CHAR(24), S_DIST_04 CHAR(24), S_DIST_05 CHAR(24), S_DIST_06 CHAR(24), S_DIST_07 CHAR(24), S_DIST_08 CHAR(24), S_DIST_09 CHAR(24), S_DIST_10 CHAR(24), S_YTD NUMBER(10, 0), S_ORDER_CNT NUMBER(6, 0), S_REMOTE_CNT NUMBER(6, 0), S_DATA VARCHAR2(50))"
         set sql(7) "CREATE TABLE NEW_ORDER (NO_W_ID NUMBER, NO_D_ID NUMBER, NO_O_ID NUMBER)"
         set sql(8) "CREATE TABLE ORDERS (O_ID NUMBER, O_W_ID NUMBER, O_D_ID NUMBER, O_C_ID NUMBER, O_CARRIER_ID NUMBER, O_OL_CNT NUMBER, O_ALL_LOCAL NUMBER, O_ENTRY_D DATE)"
@@ -1660,7 +1660,7 @@ proc CreateTables { lda ora_compatible citus_compatible num_part } {
         set sql(2) "CREATE TABLE DISTRICT (D_W_ID INTEGER NOT NULL, D_NEXT_O_ID INTEGER NOT NULL, D_ID SMALLINT NOT NULL, D_YTD NUMERIC(12,2) NOT NULL, D_TAX NUMERIC(4,4) NOT NULL, D_NAME CHARACTER VARYING(10) NOT NULL, D_STREET_1 CHARACTER VARYING(20) NOT NULL, D_STREET_2 CHARACTER VARYING(20) NOT NULL, D_CITY CHARACTER VARYING(20) NOT NULL, D_STATE CHARACTER(2) NOT NULL, D_ZIP CHARACTER(9) NOT NULL, CONSTRAINT DISTRICT_I1 PRIMARY KEY (D_W_ID, D_ID))"
         set sql(3) "CREATE TABLE HISTORY (H_DATE TIMESTAMP WITH TIME ZONE NOT NULL, H_C_ID INTEGER, H_C_W_ID INTEGER NOT NULL, H_W_ID INTEGER NOT NULL, H_C_D_ID SMALLINT NOT NULL, H_D_ID SMALLINT NOT NULL, H_AMOUNT NUMERIC(6,2) NOT NULL, H_DATA CHARACTER VARYING(24) NOT NULL)"
         set sql(4) "CREATE TABLE ITEM (I_ID INTEGER NOT NULL, I_IM_ID INTEGER NOT NULL, I_NAME CHARACTER VARYING(24) NOT NULL, I_PRICE NUMERIC(5,2) NOT NULL, I_DATA CHARACTER VARYING(50) NOT NULL, CONSTRAINT ITEM_I1 PRIMARY KEY (I_ID))"
-        set sql(5) "CREATE TABLE WAREHOUSE (W_ID INTEGER NOT NULL, W_NAME CHARACTER VARYING(10) NOT NULL, W_STREET_1 CHARACTER VARYING(20) NOT NULL, W_STREET_2 CHARACTER VARYING(20) NOT NULL, W_CITY CHARACTER VARYING(20) NOT NULL, W_STATE CHARACTER(2) NOT NULL, W_ZIP CHARACTER(9) NOT NULL, W_TAX NUMERIC(4,4) NOT NULL, W_YTD NUMERIC(12,2) NOT NULL, CONSTRAINT WAREHOUSE_I1 PRIMARY KEY (W_ID))"
+        set sql(5) "CREATE TABLE WAREHOUSE (W_ID INTEGER NOT NULL, W_NAME CHARACTER VARYING(10) NOT NULL, W_STREET_1 CHARACTER VARYING(20) NOT NULL, W_STREET_2 CHARACTER VARYING(20) NOT NULL, W_CITY CHARACTER VARYING(20) NOT NULL, W_STATE CHARACTER(2) NOT NULL, W_ZIP CHARACTER(9) NOT NULL, W_TAX NUMERIC(4,4) NOT NULL, W_YTD NUMERIC(16,2) NOT NULL, CONSTRAINT WAREHOUSE_I1 PRIMARY KEY (W_ID))"
         set sql(6) "CREATE TABLE STOCK (S_I_ID INTEGER NOT NULL, S_W_ID INTEGER NOT NULL, S_YTD INTEGER NOT NULL, S_QUANTITY SMALLINT NOT NULL, S_ORDER_CNT SMALLINT NOT NULL, S_REMOTE_CNT SMALLINT NOT NULL, S_DIST_01 CHARACTER(24) NOT NULL, S_DIST_02 CHARACTER(24) NOT NULL, S_DIST_03 CHARACTER(24) NOT NULL, S_DIST_04 CHARACTER(24) NOT NULL, S_DIST_05 CHARACTER(24) NOT NULL, S_DIST_06 CHARACTER(24) NOT NULL, S_DIST_07 CHARACTER(24) NOT NULL, S_DIST_08 CHARACTER(24) NOT NULL, S_DIST_09 CHARACTER(24) NOT NULL, S_DIST_10 CHARACTER(24) NOT NULL, S_DATA CHARACTER VARYING(50) NOT NULL, CONSTRAINT STOCK_I1 PRIMARY KEY (S_I_ID, S_W_ID))"
         set sql(7) "CREATE TABLE NEW_ORDER (NO_W_ID INTEGER NOT NULL, NO_O_ID INTEGER NOT NULL, NO_D_ID SMALLINT NOT NULL, CONSTRAINT NEW_ORDER_I1 PRIMARY KEY (NO_W_ID, NO_D_ID, NO_O_ID))"
         set sql(8) "CREATE TABLE ORDERS (O_ENTRY_D TIMESTAMP WITH TIME ZONE NOT NULL, O_ID INTEGER NOT NULL, O_W_ID INTEGER NOT NULL, O_C_ID INTEGER NOT NULL, O_D_ID SMALLINT NOT NULL, O_CARRIER_ID SMALLINT, O_OL_CNT SMALLINT NOT NULL, O_ALL_LOCAL SMALLINT NOT NULL, CONSTRAINT ORDERS_I1 PRIMARY KEY (O_W_ID, O_D_ID, O_ID))"
@@ -2051,7 +2051,7 @@ proc LoadWare { lda ware_start count_ware MAXITEMS DIST_PER_WARE } {
     set globArray [ list 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p q r s t u v w x y z ]
     set chalen [ llength $globArray ]
     puts "Loading Warehouse"
-    set w_ytd 3000000.00
+    set w_ytd 300000.00
     for {set w_id $ware_start } {$w_id <= $count_ware } {incr w_id } {
         #set w_name [ MakeAlphaString  10 $globArray $chalen ]
         set w_name [ MakePrefName "name-" 5 5  $globArray $chalen ]
@@ -2223,7 +2223,7 @@ proc do_tpcc { host port sslmode count_ware superuser superuser_password default
     }
 }
 }
-        .ed_mainFrame.mainwin.textFrame.left.text fastinsert end "do_tpcc $pg_host $pg_port $pg_sslmode $pg_count_ware $pg_superuser $pg_superuserpass $pg_defaultdbase $pg_dbase $pg_tspace $pg_user $pg_pass $pg_oracompat $pg_cituscompat $pg_storedprocs $pg_partition $pg_num_vu"
+        .ed_mainFrame.mainwin.textFrame.left.text fastinsert end "do_tpcc $pg_host $pg_port $pg_sslmode $pg_count_ware $pg_superuser [ quotemeta $pg_superuserpass ] $pg_defaultdbase $pg_dbase $pg_tspace $pg_user [ quotemeta $pg_pass ] $pg_oracompat $pg_cituscompat $pg_storedprocs $pg_partition $pg_num_vu"
     } else { return }
 }
 
@@ -2382,13 +2382,13 @@ proc insert_pgconnectpool_drivescript { testtype timedtype } {
         }
         foreach lda [ dict values $connlist ] {  pg_disconnect $lda }
         pg_disconnect $mlda
-    }
+}
     #Find single connection start and end points
     set syncdrvi(1a) [.ed_mainFrame.mainwin.textFrame.left.text search -backwards "proc fn_prep_statement" end ]
     set syncdrvi(1b) [.ed_mainFrame.mainwin.textFrame.left.text search -backwards "pg_disconnect \$lda" end ]
     #puts "indexes are $syncdrvi(1a) and $syncdrvi(1b)"
     #Delete text from start and end points
-    .ed_mainFrame.mainwin.textFrame.left.text fastdelete $syncdrvi(1a) $syncdrvi(1b)+1l
+    .ed_mainFrame.mainwin.textFrame.left.text fastdelete $syncdrvi(1a) $syncdrvi(1b)
     #Replace with connect pool version
     .ed_mainFrame.mainwin.textFrame.left.text fastinsert $syncdrvi(1a) $syncdrvt(1)
     if { $testtype eq "timed" } {
@@ -2541,7 +2541,7 @@ set host \"$pg_host\" ;# Address of the server hosting PostgreSQL
 set port \"$pg_port\" ;# Port of the PostgreSQL Server
 set sslmode \"$pg_sslmode\" ;# SSLMode of the PostgreSQL Server
 set user \"$pg_user\" ;# PostgreSQL user
-set password \"$pg_pass\" ;# Password for the PostgreSQL user
+set password \"[ quotemeta $pg_pass ]\" ;# Password for the PostgreSQL user
 set db \"$pg_dbase\" ;# Database containing the TPC Schema
 #EDITABLE OPTIONS##################################################
 "
@@ -2850,10 +2850,10 @@ set host \"$pg_host\" ;# Address of the server hosting PostgreSQL
 set port \"$pg_port\" ;# Port of the PostgreSQL server
 set sslmode \"$pg_sslmode\" ;# SSLMode of the PostgreSQL Server
 set superuser \"$pg_superuser\" ;# Superuser privilege user
-set superuser_password \"$pg_superuserpass\" ;# Password for Superuser
+set superuser_password \"[ quotemeta $pg_superuserpass ]\" ;# Password for Superuser
 set default_database \"$pg_defaultdbase\" ;# Default Database for Superuser
 set user \"$pg_user\" ;# PostgreSQL user
-set password \"$pg_pass\" ;# Password for the PostgreSQL user
+set password \"[ quotemeta $pg_pass ]\" ;# Password for the PostgreSQL user
 set db \"$pg_dbase\" ;# Database containing the TPC Schema
 #EDITABLE OPTIONS##################################################
 "
@@ -2878,6 +2878,18 @@ proc ConnectToPostgres { host port sslmode user password dbname } {
     }
     return $lda
 }
+
+proc CheckDBVersion { lda1 } {
+           if {[catch {pg_select $lda1 "select current_setting('server_version')" version_arr {
+                set dbversion $version_arr(current_setting)
+            }}]} {
+                set dbversion "DBVersion:NULL"
+           } else {
+                set dbversion "DBVersion:$dbversion"
+           }
+           return "$dbversion"
+        }
+
 set rema [ lassign [ findvuposition ] myposition totalvirtualusers ]
 switch $myposition {
     1 { 
@@ -2893,6 +2905,7 @@ switch $myposition {
                 error "error, the database connection to $host could not be established"
             } 
             set ramptime 0
+	    puts [ CheckDBVersion $lda1 ]
             puts "Beginning rampup time of $rampup minutes"
             set rampup [ expr $rampup*60000 ]
             while {$ramptime != $rampup} {
@@ -3273,10 +3286,10 @@ set host \"$pg_host\" ;# Address of the server hosting PostgreSQL
 set port \"$pg_port\" ;# Port of the PostgreSQL server
 set sslmode \"$pg_sslmode\" ;# SSLMode of the PostgreSQL Server
 set superuser \"$pg_superuser\" ;# Superuser privilege user
-set superuser_password \"$pg_superuserpass\" ;# Password for Superuser
+set superuser_password \"[ quotemeta $pg_superuserpass ]\" ;# Password for Superuser
 set default_database \"$pg_defaultdbase\" ;# Default Database for Superuser
 set user \"$pg_user\" ;# PostgreSQL user
-set password \"$pg_pass\" ;# Password for the PostgreSQL user
+set password \"[ quotemeta $pg_pass ]\" ;# Password for the PostgreSQL user
 set db \"$pg_dbase\" ;# Database containing the TPC Schema
 set async_client $pg_async_client;# Number of asynchronous clients per Vuser
 set async_verbose $pg_async_verbose;# Report activity of asynchronous clients
@@ -3305,6 +3318,18 @@ proc ConnectToPostgres { host port sslmode user password dbname } {
     }
     return $lda
 }
+
+proc CheckDBVersion { lda1 } {
+           if {[catch {pg_select $lda1 "select current_setting('server_version')" version_arr {
+                set dbversion $version_arr(current_setting)
+            }}]} {
+                set dbversion "DBVersion:NULL"
+           } else {
+                set dbversion "DBVersion:$dbversion"
+           }
+           return "$dbversion"
+        }
+
 set rema [ lassign [ findvuposition ] myposition totalvirtualusers ]
 switch $myposition {
     1 { 
@@ -3320,6 +3345,7 @@ switch $myposition {
                 error "error, the database connection to $host could not be established"
             } 
             set ramptime 0
+	    puts [ CheckDBVersion $lda1 ]
             puts "Beginning rampup time of $rampup minutes"
             set rampup [ expr $rampup*60000 ]
             while {$ramptime != $rampup} {
@@ -3790,6 +3816,163 @@ proc drop_schema { host port sslmode user superuser superuser_password default_d
 }
 }
 
-        .ed_mainFrame.mainwin.textFrame.left.text fastinsert end "drop_schema $pg_host $pg_port $pg_sslmode $pg_user $pg_superuser $pg_superuserpass $pg_defaultdbase $pg_dbase"
+        .ed_mainFrame.mainwin.textFrame.left.text fastinsert end "drop_schema $pg_host $pg_port $pg_sslmode $pg_user $pg_superuser [ quotemeta $pg_superuserpass ] $pg_defaultdbase $pg_dbase"
+    } else { return }
+}
+
+proc check_pgtpcc {} {
+    global maxvuser suppo ntimes threadscreated _ED
+    upvar #0 dbdict dbdict
+    if {[dict exists $dbdict postgresql library ]} {
+        set library [ dict get $dbdict postgresql library ]
+    } else { set library "Pgtcl" }
+    upvar #0 configpostgresql configpostgresql
+    #set variables to values in dict
+    setlocaltpccvars $configpostgresql
+    if {[ tk_messageBox -title "Check Schema" -icon question -message "Do you want to check the [ string toupper $pg_dbase ] TPROC-C schema and role [ string toupper $pg_user ]\n in host [string toupper $pg_host:$pg_port] under user [ string toupper $pg_superuser ]?" -type yesno ] == yes} {
+        set maxvuser 1
+        set suppo 1
+        set ntimes 1
+        ed_edit_clear
+        set _ED(packagekeyname) "TPROC-C check"
+        if { [catch {load_virtual} message]} {
+            puts "Failed to create threads for schema check: $message"
+            return
+        }
+        .ed_mainFrame.mainwin.textFrame.left.text fastinsert end "#!/usr/local/bin/tclsh8.6
+#LOAD LIBRARIES AND MODULES
+set library $library
+"
+        .ed_mainFrame.mainwin.textFrame.left.text fastinsert end {
+if [catch {package require $library} message] { error "Failed to load $library - $message" }
+if [catch {::tcl::tm::path add modules} ] { error "Failed to find modules directory" }
+if [catch {package require tpcccommon} ] { error "Failed to load tpcc common functions" } else { namespace import tpcccommon::* }
+
+proc ConnectToPostgres { host port sslmode user password dbname } {
+    global tcl_platform
+    if {[catch {set lda [pg_connect -conninfo [list host = $host port = $port sslmode = $sslmode user = $user password = $password dbname = $dbname ]]} message]} {
+        set lda "Failed" ; puts $message
+        error $message
+    } else {
+        pg_notice_handler $lda puts
+        set result [ pg_exec $lda "set CLIENT_MIN_MESSAGES TO 'ERROR'" ]
+        pg_result $result -clear
+    }
+    return $lda
+}
+
+proc check_tpcc { host port sslmode user superuser superuser_password default_dbase dbase count_ware } {
+    puts "Checking $dbase TPROC-C schema"
+    set tables [ dict create warehouse $count_ware customer [ expr {$count_ware * 30000} ] district [ expr {$count_ware * 10} ] history [ expr {$count_ware * 30000} ] item 100000 new_order [ expr {$count_ware * 9000 * 0.90} ] order_line [ expr {$count_ware * 300000 * 0.99} ] orders [ expr {$count_ware * 30000} ] stock [ expr {$count_ware * 100000} ] ]
+    set sps [ list delivery neword ostat payment slev ]
+    set suconnect [ ConnectToPostgres $host $port $sslmode $superuser $superuser_password $default_dbase ]
+    if { $suconnect eq "Failed" } {
+        error "error, the database connection to $host could not be established"
+    } else {
+  #Check 1 Database Exists
+    puts "Check database"
+    set result [ pg_exec $suconnect "SELECT 1 FROM pg_database WHERE datname = '$dbase'"]
+    if { [pg_result $result -numTuples] > 0} {
+    set existing_db [ ConnectToPostgres $host $port $sslmode $superuser $superuser_password $dbase ]
+        if { $existing_db eq "Failed" } {
+            error "error, the database connection to $host could not be established"
+        } else {
+            set result [ pg_exec $existing_db "SELECT 1 FROM pg_tables WHERE schemaname = 'public'"]
+            if { [pg_result $result -numTuples] == 0 } {
+	    error "TPROC-C Schema check failed $dbase schema is empty"
+	    } else {
+	    #Check 2 Tables Exist
+            puts "Check tables and indices"
+	    foreach table [dict keys $tables] {
+	     pg_select $existing_db "SELECT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = '$table')" exists_arr {
+            set torf $exists_arr(exists)
+	}
+	        if { $torf == "f" } {
+        error "TPROC-C Schema check failed $dbase schema is missing table $table"
+        } else {
+		if { $table eq "warehouse" } {
+            pg_select $existing_db "select max(w_id) from warehouse" w_id_input_arr {
+            set w_id_input $w_id_input_arr(max)
+            }
+	    if { $count_ware != $w_id_input } {
+        error "TPROC-C Schema check failed $dbase schema warehouse count $w_id_input does not equal dict warehouse count of $count_ware"
+        }
+        }
+	    #Check 4 Tables are indexed
+            set result [ pg_exec $existing_db "select tablename,indexname from pg_indexes where tablename = '$table'" ]
+            if { [pg_result $result -numTuples] == 0 } {
+		     if { $table != "history" } {
+        error "TPROC-C Schema check failed $dbase schema on table $table no indices"
+        }
+	}
+	    #Check 5 Tables are populated
+	    set expected_rows [ dict get $tables $table ]
+            pg_select $existing_db "select count(*) as row_count from $table" arc_arr {
+            set  rows $arc_arr(row_count)
+            }
+	      if { $rows < $expected_rows } {
+        error "TPROC-C Schema check failed $dbase schema on table $table row count of $rows is less than expected count of $expected_rows"
+        }
+        }
+        }
+	    #Check 6 Stored Procedures Exist
+	puts "Check procedures"
+        foreach sp $sps {
+	     pg_select $existing_db "SELECT EXISTS ( SELECT * FROM pg_catalog.pg_proc JOIN pg_namespace ON pg_catalog.pg_proc.pronamespace = pg_namespace.oid WHERE proname = '$sp' AND pg_namespace.nspname = 'public')" exists_arr {
+            set torf $exists_arr(exists)
+	}
+	        if { $torf == "f" } {
+	error "TPROC-C Schema check failed $dbase schema is missing stored procedure $sp"
+        } 
+    }
+            #Create temporary sample table
+        pg_exec $existing_db "create temporary table temp_w (t_w_id smallint null)" 
+        if { $w_id_input <= 10 } {
+        for  {set i 1} {$i <= $w_id_input} { incr i} {
+        pg_exec $existing_db "insert into temp_w values ($i)"
+        }
+        } else {
+        foreach statement {{insert into temp_w values (1)} {insert into temp_w values ([expr {0.1 * $w_id_input}])} {insert into temp_w values ([expr {0.2 * $w_id_input}])} {insert into temp_w values ([expr {0.3 * $w_id_input}])} {insert into temp_w values ([expr {0.4 * $w_id_input}])} {insert into temp_w values ([expr {0.5 * $w_id_input}])} {insert into temp_w values ([expr {0.6 * $w_id_input}])} {insert into temp_w values ([expr {0.7 * $w_id_input}])} {insert into temp_w values ([expr {0.8 * $w_id_input}])} {insert into temp_w values ([expr {0.9 * $w_id_input}])} {insert into temp_w values ($w_id_input)}} {
+        pg_exec $existing_db [ subst $statement ]
+        }
+        }
+           #Consistency check 1
+        puts "Check consistency 1"
+            set result [ pg_exec $existing_db "select d_w_id, (w_ytd - sum(d_ytd)) diff from warehouse, district where d_w_id=w_id group by d_w_id, w_ytd having (w_ytd - sum(d_ytd)) != 0" ]
+            if { [pg_result $result -numTuples] != 0 } {
+        error "TPROC-C Schema check failed $dbase schema consistency check 1 failed"
+        }
+           #Consistency check 2
+        puts "Check consistency 2"
+            set result [ pg_exec $existing_db "select * from (select d_w_id, d_id, max(o_id) AS ORDER_MAX, (d_next_o_id - 1) AS ORDER_NEXT from district, orders where d_w_id = o_w_id and d_id = o_d_id and d_w_id in (select t_w_id from temp_w) group by d_w_id, d_id, (d_next_o_id - 1)) dt where dt.ORDER_NEXT != dt.ORDER_MAX" ]
+            if { [pg_result $result -numTuples] != 0 } {
+        error "TPROC-C Schema check failed $dbase schema consistency check 2 failed"
+        }
+           #Consistency check 3
+        puts "Check consistency 3"
+            set result [ pg_exec $existing_db "select * from (select count(*) as nocount, (max(no_o_id) - min(no_o_id) + 1) as total from new_order group by no_w_id, no_d_id) dt where nocount != total" ]
+            if { [pg_result $result -numTuples] != 0 } {
+        error "TPROC-C Schema check failed $dbase schema consistency check 3 failed"
+        }
+           #Consistency check 4
+        puts "Check consistency 4"
+            set result [ pg_exec $existing_db "select * from (select o_w_id, o_d_id, sum(o_ol_cnt) as ol_sum from orders, temp_w where o_w_id = t_w_id group by o_w_id, o_d_id) consist1, (select ol_w_id, ol_d_id, count(*) as ol_count from order_line, temp_w where ol_w_id = t_w_id group by ol_w_id, ol_d_id) consist2 where o_w_id = ol_w_id and o_d_id = ol_d_id and ol_sum != ol_count" ]
+            if { [pg_result $result -numTuples] != 0 } {
+        error "TPROC-C Schema check failed $dbase schema consistency check 4 failed"
+        }
+    pg_exec $existing_db "drop table temp_w" 
+    puts "$dbase TPROC-C Schema has been checked successfully."
+    }
+    }
+    } else {
+     error "Schema check failed $dbase TPROC-C schema does not exist"
+    }
+    pg_disconnect $existing_db
+    pg_disconnect $suconnect
+    return
+    }
+}
+}
+        .ed_mainFrame.mainwin.textFrame.left.text fastinsert end "check_tpcc $pg_host $pg_port $pg_sslmode $pg_user $pg_superuser [ quotemeta $pg_superuserpass ] $pg_defaultdbase $pg_dbase $pg_count_ware"
     } else { return }
 }
