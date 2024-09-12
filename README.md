@@ -6,9 +6,9 @@ Add to HammerDB possibility to generate compressible data in TPC-C workload.
 2. download files from this git 
 3. Change files in main HammerDB's folder from folder Compression_3 
 
-Compatible per database:
+## Compatible per database:
 
-*mssqlserver: with HammerDB version 4.8
-*mysql: with HammerDB version 4.8 
-*oracle: with HammerDB version 4.8
-*postgresql: with HammerDB version 4.11
+* mssqlserver: with HammerDB version 4.8
+* mysql: with HammerDB version 4.8 
+* oracle: with HammerDB version 4.8
+* postgresql: with HammerDB version 4.11
